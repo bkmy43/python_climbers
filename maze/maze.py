@@ -44,4 +44,69 @@
 #         }
 #     return false;
 # }
+import random
 
+class Maze:
+    walls = [[False]]
+
+    def __init__(self, height, width):
+        self.height = height
+        self.width = width
+        self.entrance = (0,0)
+        self.exit = (height, width)
+        self.walls = [[False for i in range(width)] for j in range(height)]
+
+    def display(self):
+        wall_display_symbol = {True: u'\u2588\u2588', False: '  '}
+        symbols = {"H_BOUND": u'\u2501\u2501', "V_BOUND": u'\u2503', "UP_LEFT": u'\u250F', "UP_RIGHT": u'\u2513', "BOTTOM_LEFT": u'\u2517', "BOTTOM_RIGHT": u'\u251B'}
+
+        print("Maze size: {}*{}\nEntrance: {}, Exit: {}".format(self.height, self.width, self.entrance, self.exit))
+        print("{}{}{}".format(symbols.get("UP_LEFT"),symbols.get("H_BOUND") * self.width, symbols.get("UP_RIGHT")))
+
+        for i in range(self.height):
+            if (i,0) != self.entrance and (i,0) != self.exit:
+                str = symbols.get("V_BOUND")
+            else:
+                str = ' '
+
+            for j in range(self.width):
+                str = str + wall_display_symbol.get(self.walls[i][j])
+
+            if (i,j) != self.entrance and (i,j) != self.exit:
+                str = str + symbols.get("V_BOUND")
+
+            print(str)
+
+        print("{}{}{}".format(symbols.get("BOTTOM_LEFT"), symbols.get("H_BOUND") * self.width, symbols.get("BOTTOM_RIGHT")))
+
+    def randomize(self, walls_density=0.2):
+        self.entrance = self.get_random_position_on_maze_boundary()
+        self.exit = self.get_random_position_on_maze_boundary()
+
+        for i in range(self.height):
+            for j in range(self.width):
+                if random.random() < walls_density and (i,j)!=self.entrance and (i,j) !=self.exit:
+                    self.walls[i][j] = True
+
+
+    def get_random_position_on_maze_boundary(self):
+        boundaries = ['UP', 'LEFT', 'BOTTOM', 'RIGHT']
+
+        wall = random.choice(boundaries)
+
+        if wall == 'UP':
+            return (0, random.choice(range(self.width)))
+
+        if wall == 'BOTTOM':
+            return (self.height, random.choice(range(self.width)))
+
+        if wall == 'LEFT':
+            return (random.choice(range(self.height)), 0)
+
+        if wall == 'RIGHT':
+            return (random.choice(range(self.height)), self.width)
+
+
+m1 = Maze(15,15)
+m1.randomize(0.3)
+m1.display()
