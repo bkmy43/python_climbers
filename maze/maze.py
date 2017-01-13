@@ -57,11 +57,19 @@ class Maze:
         self.walls = [[False for i in range(width)] for j in range(height)]
 
     def display(self):
-        wall_display_symbol = {True: u'\u2588\u2588', False: '  '}
-        symbols = {"H_BOUND": u'\u2501\u2501', "V_BOUND": u'\u2503', "UP_LEFT": u'\u250F', "UP_RIGHT": u'\u2513', "BOTTOM_LEFT": u'\u2517', "BOTTOM_RIGHT": u'\u251B'}
+        symbols = {"CUR_POSITION": u'\u2591\u2591', "EMPTY_CELL":'  ', "WALL": u'\u2588\u2588',
+                   "H_BOUND": u'\u2501\u2501', "V_BOUND": u'\u2503',
+                   "UP_LEFT": u'\u250F', "UP_RIGHT": u'\u2513', "BOTTOM_LEFT": u'\u2517', "BOTTOM_RIGHT": u'\u251B'}
 
         print("Maze size: {}*{}\nEntrance: {}, Exit: {}".format(self.height, self.width, self.entrance, self.exit))
-        print("{}{}{}".format(symbols.get("UP_LEFT"),symbols.get("H_BOUND") * self.width, symbols.get("UP_RIGHT")))
+
+        str = symbols.get("UP_LEFT")
+        for j in range(self.width):
+            if (0, j) != self.entrance and (0, j) != self.exit:
+                str = str + symbols.get("H_BOUND")
+            else:
+                str = str + '  '
+        print(str + symbols.get("UP_RIGHT"))
 
         for i in range(self.height):
             if (i,0) != self.entrance and (i,0) != self.exit:
@@ -70,14 +78,26 @@ class Maze:
                 str = ' '
 
             for j in range(self.width):
-                str = str + wall_display_symbol.get(self.walls[i][j])
+                if (i,j) == self.entrance:
+                    str = str + symbols.get("CUR_POSITION")
+                else:
+                    if self.walls[i][j]:
+                        str = str + symbols.get("WALL")
+                    else:
+                        str = str + symbols.get("EMPTY_CELL")
 
             if (i,j) != self.entrance and (i,j) != self.exit:
                 str = str + symbols.get("V_BOUND")
 
             print(str)
 
-        print("{}{}{}".format(symbols.get("BOTTOM_LEFT"), symbols.get("H_BOUND") * self.width, symbols.get("BOTTOM_RIGHT")))
+        str = symbols.get("BOTTOM_LEFT")
+        for j in range(self.width):
+            if (self.height-1, j) != self.entrance and (self.height-1, j) != self.exit:
+                str = str + symbols.get("H_BOUND")
+            else:
+                str = str + '  '
+        print(str + symbols.get("BOTTOM_RIGHT"))
 
     def randomize(self, walls_density=0.2):
         self.entrance = self.get_random_position_on_maze_boundary()
@@ -98,15 +118,25 @@ class Maze:
             return (0, random.choice(range(self.width)))
 
         if wall == 'BOTTOM':
-            return (self.height, random.choice(range(self.width)))
+            return (self.height-1, random.choice(range(self.width)))
 
         if wall == 'LEFT':
             return (random.choice(range(self.height)), 0)
 
         if wall == 'RIGHT':
-            return (random.choice(range(self.height)), self.width)
+            return (random.choice(range(self.height)), self.width-1)
+
+
+m1 = Maze(10,10)
+m1.randomize(0.2)
+m1.display()
 
 
 m1 = Maze(15,15)
 m1.randomize(0.3)
+m1.display()
+
+
+m1 = Maze(20,20)
+m1.randomize(0.4)
 m1.display()
