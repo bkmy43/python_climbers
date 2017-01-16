@@ -61,6 +61,7 @@ class Maze:
         self.exit = (height, width)
         self.walls = [[False for i in range(width)] for j in range(height)]
         self.visited = [[False for i in range(width)] for j in range(height)]
+        self.visited_count = [[0 for i in range(width)] for j in range(height)]
 
     def cur_position(self):
         return (self.cur_y, self.cur_x)
@@ -159,19 +160,20 @@ class Maze:
                 return False
 
         self.visited[self.cur_y][self.cur_x] = True
+        self.visited_count[self.cur_y][self.cur_x] += 1
+
         return True
 
     def chaotic_run(self):
         for i in range(self.max_steps):
             time.sleep(self.pause_between_steps)
             os.system('clear')
-            m1.move(random.choice(('UP', 'DOWN', 'LEFT', 'RIGHT')))
-            m1.display()
+            self.move(random.choice(('UP', 'DOWN', 'LEFT', 'RIGHT')))
+            self.display()
             if self.cur_position() == self.exit:
                 print("Sucessfully reached exit. {} steps were needed".format(i + 1))
                 return True
             print("This is CHAOTIC RUN\nTrying to get out of this maze... {} steps done".format(i+1))
-            print(self.get_best_move())
 
         print("Maximum of {} steps reached, exit not found...".format(i+1))
         return False
@@ -181,40 +183,32 @@ class Maze:
         for i in range(self.max_steps):
             time.sleep(self.pause_between_steps)
             os.system('clear')
-            m1.move(self.get_best_move())
-            m1.display()
+            self.move(self.get_best_move())
+            self.display()
             if self.cur_position() == self.exit:
                 print("Sucessfully reached exit. {} steps were needed".format(i + 1))
                 return True
             print("This is SMART RUN\nTrying to get out of this maze... {} steps done".format(i + 1))
-
         print("Maximum of {} steps reached, exit not found...".format(i + 1))
         return False
 
     def get_best_move(self):
-        options = {'UP':0, 'DOWN':0, 'LEFT':0, 'RIGHT':0}
+        moves = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+        options = {}
+        new_position = (self.cur_y, self.cur_x)
 
-        for option in options.keys():
-            if option == 'UP':
-                if self.cur_y > 0 and not self.walls[self.cur_y - 1][self.cur_x]:
-                    options[option] = self.get_distance(self.exit, (self.cur_y-1, self.cur_x))
-                else:
-                    options[option] = self.width + self.height
-            elif option == 'DOWN':
-                if self.cur_y < self.height - 1 and not self.walls[self.cur_y + 1][self.cur_x] and not self.visited[self.cur_y + 1][self.cur_x]:
-                    options[option] = self.get_distance(self.exit, (self.cur_y + 1, self.cur_x))
-                else:
-                    options[option] = self.width + self.height
-            elif option == 'LEFT':
-                if self.cur_x > 0 and not self.walls[self.cur_y][self.cur_x - 1]  and not self.visited[self.cur_y][self.cur_x - 1]:
-                    options[option] = self.get_distance(self.exit, (self.cur_y, self.cur_x-1))
-                else:
-                    options[option] = self.width + self.height
-            elif option == 'RIGHT':
-                if self.cur_x < self.width - 1 and not self.walls[self.cur_y][self.cur_x + 1] and not self.visited[self.cur_y][self.cur_x + 1]:
-                    options[option] = self.get_distance(self.exit, (self.cur_y, self.cur_x - 1))
-                else:
-                    options[option] = self.width + self.height
+        for move in moves:
+            if move == 'UP':
+                new_position = (self.cur_y - 1, self.cur_x)
+            elif move == 'DOWN':
+                new_position = (self.cur_y + 1, self.cur_x)
+            elif move == 'LEFT':
+                new_position = (self.cur_y, self.cur_x - 1)
+            elif move == 'RIGHT':
+                new_position = (self.cur_y, self.cur_x + 1)
+
+            if new_position[0] >= 0 and new_position[0] < self.height and new_position[1] >= 0 and new_position[1] < self.width and not self.walls[new_position[0]][new_position[1]]:
+                options[move] = self.get_distance(self.exit, new_position) * (self.visited_count[new_position[0]][new_position[1]] + 1)
 
         return min(options, key=options.get)
 
